@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship, sessionmaker
 
 # Conexion a la base de datos
 DATABASE_URL = "mysql+mysqlconnector://root@localhost:3306/revista"
+#DATABASE_URL = "sqlite:///revista.db"
 engine = create_engine(DATABASE_URL, echo=False)
 
 # Clase base para trabajar con SQLAlchemy
@@ -59,21 +60,33 @@ session = Session()
 
 # Insertar datos 1:1
 user1 = User(username='petra')
+session.add(user1)
+session.commit()
 address1 = Address(email='petra@ejemplo.com', user=user1)
 user1.address = address1
+session.add(address1)
+session.commit()
 
 # Insertar datos 1:M
 user2 = User(username='calixtra')
+session.add(user2)
+session.commit()
 articulo1 = Article(title='Articulo X', content='Contenido de articulo X', author_id=user2.id)
 articulo2 = Article(title='Articulo Y', content='Contenido de articulo Y', author_id=user2.id)
+session.add(articulo1)
+session.commit()
+session.add(articulo2)
+session.commit()
 
 # Insertar datos M:M
 user3 = User(username='susana')
 user4 = User(username='toribia')
+session.add(user3)
+session.commit()
+session.add(user4)
+session.commit()
 group1 = Group(name="deudoras", users=[user3, user4])
-
-session.add_all([user1, address1, user2, articulo1, articulo2, user3, user4, group1])
-
+session.add(group1)
 session.commit()
 
 # Consultar todos los registros
@@ -103,4 +116,28 @@ article_query = session.query(Article).join(User).filter(User.username == 'calix
 for article in article_query:
     print(article.title, article.content)
 
+# Insertar sin valor quemado
+while True:
+    print("Insertemos muchos usuarios (primero a chacalca2 para correccion automatica)")
+    usuario = input("Nombre de Usuario: ")
+    if usuario != 'X':
+        u = User(username=usuario)
+        session.add(u)
+        session.commit()
+    else:
+        break
+    print("Ya se inserto el usuario. Vamos con otro. Escribe X para salir")
+
+# Modificacion de username
+chacalaca2 = session.query(User).filter_by(username='chacalca2').first()
+chacalaca2.username = "chacalaca2"
+session.commit()
+
+# Consultar todos los registros
+print("Todos los usuarios")
+users = session.query(User).all()
+for user in users:
+    print(user.username)
+
+print("Ciao!")
 session.close()
